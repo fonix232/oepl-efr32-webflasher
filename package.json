@@ -1,0 +1,22 @@
+{
+  "name": "oepl-efr32-webflasher",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "manifest": "node scripts/build-manifest.mjs",
+    "dev": "npm run manifest && vite",
+    "build": "npm run manifest && tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/w3c-web-usb": "^1.0.14",
+    "typescript": "^5.9.3",
+    "usb": "^2.19.1",
+    "vite": "^6.4.4",
+    "vitest": "^3.2.7"
+  },
+  "license": "MIT"
+}
