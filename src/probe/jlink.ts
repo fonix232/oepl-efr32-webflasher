@@ -92,8 +92,10 @@ export function encodeTransfer(b: Bits, ap: boolean, write: boolean, reg: number
   const a2 = (reg >> 2) & 1;
   const a3 = (reg >> 3) & 1;
   b.out(1 | (apb << 1) | (rnw << 2) | (a2 << 3) | (a3 << 4) | ((apb ^ rnw ^ a2 ^ a3) << 5) | (1 << 7), 8);
-  b.in(1); // turnaround
+  // J-Link reports each sampled bit one position early, so the ACK reads from the turnaround
+  // slot (as probe-rs's parse at REQUEST_BITS = 8). Reading after it gives FAULT for DPIDR.
   const ack = b.n;
+  b.in(1); // turnaround
   b.in(3);
   if (write) {
     b.in(1); // turnaround

@@ -60,8 +60,9 @@ class FakeJLink {
       const [ap, rnw, reg] = [h[1], h[2], (h[3] << 2) | (h[4] << 3)];
       const data = Array.from({ length: 32 }, (_, k) => bit(p + 13 + k)).reduce((a, b, k) => a | (b << k), 0) >>> 0;
       const ack = this.access(!!ap, !!rnw, reg, data);
-      drive(p + 9, ack.ack, 3);
-      if (rnw) drive(p + 12, ack.value, 32), drive(p + 44, popcount(ack.value) & 1, 1);
+      // a real J-Link returns target-driven bits one position early (seen on the Si-DBG1015A)
+      drive(p + 8, ack.ack, 3);
+      if (rnw) drive(p + 11, ack.value, 32), drive(p + 43, popcount(ack.value) & 1, 1);
       p += 46;
     }
     const bytes = new Array<number>(nb).fill(0);

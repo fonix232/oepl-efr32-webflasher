@@ -46,10 +46,11 @@ DP/AP register transfers:
 - On macOS it claims interface 2 (bulk EP3, 64-byte packets) with no driver. On Windows,
   SEGGER's driver blocks WebUSB, so users need Zadig to install WinUSB on that interface.
 - The Silicon Labs Simplicity Link Debugger (Si-DBG1015A) reports "Silicon Labs J-Link OB".
-  Opening it, reading its firmware, capabilities and VTref, and selecting SWD are verified.
-  **Not yet verified:** any real target transfer, nRESET, and whether the bits this firmware
-  reads back sit at the same offsets as on stock J-Links. Check the ACK bit position first,
-  the first time a target answers.
+  Verified on a real EFR32xG22: DPIDR 0x6BA02477 and batched DP reads.
+- **Read-back offset:** the J-Link returns each target-driven bit one position early, so the ACK
+  is read from the turnaround slot, as probe-rs does (`REQUEST_BITS = 8`). Reading after the
+  turnaround makes every DPIDR read return FAULT. The fake in `jlink.test.ts` models this
+  offset, so it fails on the old code.
 - `getTargetVoltage()` returns volts. A reading of about 3.3 V can be the debugger's own
   supply, so it doesn't prove the tag is powered.
 

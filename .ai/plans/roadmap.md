@@ -17,7 +17,8 @@ Verified 2026-10-15, with no tag attached:
 Next, once a tag is available:
 1. Run Connect and Status against the tag (read-only), on both probes. Check that the GEEK's
    LCD shows the DPIDR.
-2. J-Link: check the read-back bit offsets, nRESET, and connect-under-reset for tags in EM4.
+2. J-Link: the read-back offset is fixed and DPIDR verified on a real tag. Still to check: nRESET,
+   and connect-under-reset for tags in EM4.
 3. With user approval, on a sacrificial tag: unlock, flash v43, verify, reset. Measure the
    flash time.
 
