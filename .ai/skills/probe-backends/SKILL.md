@@ -56,7 +56,8 @@ DP/AP register transfers:
 ## Hardware smoke testing (read-only)
 
 ```sh
-npx vite-node tools/jlink-smoke.ts
+npx vite-node tools/jlink-smoke.ts      # J-Link
+npx vite-node tools/cmsisdap-smoke.ts   # CMSIS-DAP v2 (e.g. the ESP32-S3-GEEK)
 ```
 
 It opens the probe, reads firmware, capabilities and VTref, selects SWD, and reads DPIDR and
