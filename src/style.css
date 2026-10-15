@@ -14,7 +14,8 @@
 body { margin: 0; background: var(--bg); color: var(--fg); }
 main { max-width: 52rem; margin: 0 auto; padding: 1rem; }
 section { margin: 1.5rem 0; }
-label { display: inline-block; margin: 0 1rem 0.5rem 0; }
+label { display: inline-block; max-width: 100%; margin: 0 1rem 0.5rem 0; }
+select, input[type=file] { max-width: 100%; }
 button { font: inherit; padding: 0.4rem 0.9rem; margin: 0 0.5rem 0.5rem 0; border: 1px solid var(--accent); border-radius: 4px; background: var(--muted); color: var(--fg); cursor: pointer; }
 button:disabled { opacity: 0.5; cursor: not-allowed; }
 button.danger { border-color: var(--danger); color: var(--danger); }
