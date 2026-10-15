@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>OEPL EFR32 Web Flasher</title>
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>OpenEPaperLink EFR32xG22 Web Flasher</h1>
+      <p>Unlocks, erases and flashes EFR32xG22-based tags over SWD from your browser, replacing <code>reflash.py</code>.</p>
+
+      <p id="unsupported" class="error" hidden>
+        This browser has no WebUSB (<code>navigator.usb</code>). Use desktop Chrome, Edge or Opera, served over HTTPS or localhost.
+        Firefox and Safari do not support WebUSB.
+      </p>
+
+      <details>
+        <summary>Wiring (SWD header)</summary>
+        <table>
+          <tr><th scope="col">Probe</th><th scope="col">Tag</th></tr>
+          <tr><td>SWCLK</td><td>SWCLK</td></tr>
+          <tr><td>SWDIO</td><td>SWDIO</td></tr>
+          <tr><td>nRESET</td><td>RESET (needed after unlock)</td></tr>
+          <tr><td>GND</td><td>GND</td></tr>
+          <tr><td>VTref / 3V3</td><td>VCC: either the probe supplies 3.3 V, or the tag runs on its own batteries and the probe only senses it (VTref)</td></tr>
+        </table>
+        <p>Power the tag with 3.3 V or less, <strong>never 5 V</strong>. Keep wires short; the flasher uses a 1 MHz SWD clock.
+          On Linux, add a udev rule for your probe; on Windows, the probe's CMSIS-DAP v2 / J-Link interface needs the WinUSB driver.</p>
+      </details>
+
+      <section aria-labelledby="h-probe">
+        <h2 id="h-probe">1. Probe</h2>
+        <label>Probe type
+          <select id="probeType">
+            <option value="cmsisdap">CMSIS-DAP v2 (DAPLink, Pico debugprobe, ESP USB Bridge)</option>
+            <option value="jlink">SEGGER J-Link</option>
+          </select>
+        </label>
+        <button id="connect">Connect</button>
+        <button id="disconnect" disabled>Disconnect</button>
+        <dl id="info"></dl>
+      </section>
+
+      <section aria-labelledby="h-tools">
+        <h2 id="h-tools">2. Device</h2>
+        <button id="unlock" class="danger" disabled>Unlock &amp; erase…</button>
+        <button id="dumpUd" disabled>Dump userdata</button>
+        <button id="reset" disabled>Reset target</button>
+      </section>
+
+      <section aria-labelledby="h-fw">
+        <h2 id="h-fw">3. Firmware</h2>
+        <label>Version <select id="version"></select></label>
+        <label>Variant <select id="variant"></select></label>
+        <label>or local file <input id="file" type="file" accept=".s37,.srec,.hex" /></label>
+        <button id="flash" disabled>Flash</button>
+        <progress id="progress" max="1" value="0" aria-label="Flash progress"></progress>
+        <span id="progressText" aria-live="polite"></span>
+      </section>
+
+      <section aria-labelledby="h-log">
+        <h2 id="h-log">Log</h2>
+        <pre id="log" role="log" aria-live="polite" tabindex="0"></pre>
+      </section>
+    </main>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>
