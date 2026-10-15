@@ -4,69 +4,126 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='1' y='3' width='14' height='10' rx='1' fill='%230a58ca'/%3E%3Crect x='3' y='5' width='10' height='6' fill='%23fff'/%3E%3C/svg%3E" />
-    <title>OEPL EFR32 Web Flasher</title>
+    <meta name="description" content="Unlock and flash OpenEPaperLink EFR32xG22 e-ink tags from Chrome, over a CMSIS-DAP or J-Link probe." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='.5' y='2.5' width='15' height='11' rx='2' fill='%23F7F8F5' stroke='%231E1F1C'/%3E%3Crect x='2.5' y='4.5' width='11' height='7' fill='%23D9DAD3'/%3E%3Crect x='3.5' y='9' width='4' height='1.6' fill='%23C4161C'/%3E%3Crect x='9' y='5.6' width='3.5' height='2.4' fill='%231E1F1C'/%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet" />
+    <title>OEPL Tag Flasher</title>
     <link rel="stylesheet" href="./src/style.css" />
   </head>
   <body>
-    <main>
-      <h1>OpenEPaperLink EFR32xG22 Web Flasher</h1>
-      <p>Unlocks, erases and flashes EFR32xG22-based tags over SWD from your browser, replacing <code>reflash.py</code>.</p>
+    <header class="masthead">
+      <span class="wordmark">OEPL Tag Flasher</span>
+      <a href="https://github.com/fonix232/oepl-efr32-webflasher">Source on GitHub</a>
+    </header>
 
-      <p id="unsupported" class="error" hidden>
-        This browser has no WebUSB (<code>navigator.usb</code>). Use desktop Chrome, Edge or Opera, served over HTTPS or localhost.
-        Firefox and Safari do not support WebUSB.
-      </p>
+    <main class="layout">
+      <figure class="stage" aria-label="Tag status">
+        <div class="tag">
+          <div class="panel" id="panel">
+            <div class="panel-top">
+              <span>OpenEPaperLink</span>
+              <span id="tagProbe">No probe</span>
+            </div>
+            <p class="panel-product" id="tagProduct">EFR32xG22 tag</p>
+            <p class="panel-price"><span id="tagVersion">v—</span></p>
+            <p class="panel-variant" id="tagVariant">Pick a firmware</p>
+            <div class="panel-bottom">
+              <span class="band" id="tagBand" data-tone="ink">Not connected</span>
+              <span class="code">
+                <svg id="tagBarcode" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"></svg>
+                <span id="tagDpidr">No chip ID yet</span>
+              </span>
+            </div>
+          </div>
+          <span class="tag-led" id="tagLed" aria-hidden="true"></span>
+        </div>
+        <figcaption>The label shows your session as you go: the firmware you picked, the chip it found and whether the chip is locked.</figcaption>
+      </figure>
 
-      <details>
-        <summary>Wiring (SWD header)</summary>
-        <table>
-          <tr><th scope="col">Probe</th><th scope="col">Tag</th></tr>
-          <tr><td>SWCLK</td><td>SWCLK</td></tr>
-          <tr><td>SWDIO</td><td>SWDIO</td></tr>
-          <tr><td>nRESET</td><td>RESET (needed after unlock)</td></tr>
-          <tr><td>GND</td><td>GND</td></tr>
-          <tr><td>VTref / 3V3</td><td>VCC: either the probe supplies 3.3 V, or the tag runs on its own batteries and the probe only senses it (VTref)</td></tr>
-        </table>
-        <p>Power the tag with 3.3 V or less, <strong>never 5 V</strong>. Keep wires short; the flasher uses a 1 MHz SWD clock.
-          On Linux, add a udev rule for your probe; on Windows, the probe's CMSIS-DAP v2 / J-Link interface needs the WinUSB driver.</p>
-      </details>
+      <div class="flow">
+        <h1>Reflash an EFR32 price tag from your browser</h1>
+        <p class="lede">Unlock, back up and flash OpenEPaperLink EFR32xG22 tags over SWD. This page replaces <code>reflash.py</code> and needs no install.</p>
 
-      <section aria-labelledby="h-probe">
-        <h2 id="h-probe">1. Probe</h2>
-        <label>Probe type
-          <select id="probeType">
-            <option value="cmsisdap">CMSIS-DAP v2 (DAPLink, Pico debugprobe, ESP USB Bridge)</option>
-            <option value="jlink">SEGGER J-Link</option>
-          </select>
-        </label>
-        <button id="connect">Connect</button>
-        <button id="disconnect" disabled>Disconnect</button>
-        <dl id="info"></dl>
-      </section>
+        <p id="unsupported" class="notice" hidden>
+          This browser can’t talk to USB devices. Open the page in desktop Chrome, Edge or Opera. Firefox and Safari don’t support WebUSB.
+        </p>
 
-      <section aria-labelledby="h-tools">
-        <h2 id="h-tools">2. Device</h2>
-        <button id="unlock" class="danger" disabled>Unlock &amp; erase…</button>
-        <button id="dumpUd" disabled>Dump userdata</button>
-        <button id="reset" disabled>Reset target</button>
-      </section>
+        <ol class="steps">
+          <li class="step" aria-labelledby="h-probe">
+            <h2 id="h-probe">Connect your probe</h2>
+            <div class="row">
+              <label class="field">Probe
+                <select id="probeType">
+                  <option value="cmsisdap">CMSIS-DAP (DAPLink, Pico debugprobe, ESP32-S3 bridge)</option>
+                  <option value="jlink">SEGGER J-Link</option>
+                </select>
+              </label>
+              <button id="connect" class="primary">Connect</button>
+              <button id="disconnect" class="quiet" disabled>Disconnect</button>
+            </div>
+            <details class="wiring">
+              <summary>How to wire the tag</summary>
+              <table>
+                <thead><tr><th scope="col">Probe</th><th scope="col">Tag</th></tr></thead>
+                <tbody>
+                  <tr><td>SWCLK</td><td>SWCLK</td></tr>
+                  <tr><td>SWDIO</td><td>SWDIO</td></tr>
+                  <tr><td>nRESET</td><td>RESET, needed after unlocking</td></tr>
+                  <tr><td>GND</td><td>GND</td></tr>
+                  <tr><td>VTref or 3V3</td><td>VCC: the probe either powers the tag at 3.3 V or senses the tag’s own battery</td></tr>
+                </tbody>
+              </table>
+              <p>Use 3.3 V or less. Never connect 5 V; it destroys the chip. Keep the wires short, because the flasher runs SWD at 1 MHz.
+                On Linux, add a udev rule for your probe. On Windows, the probe needs the WinUSB driver.</p>
+            </details>
+          </li>
 
-      <section aria-labelledby="h-fw">
-        <h2 id="h-fw">3. Firmware</h2>
-        <label>Version <select id="version"></select></label>
-        <label>Variant <select id="variant"></select></label>
-        <label>or local file <input id="file" type="file" accept=".s37,.srec,.hex" /></label>
-        <button id="flash" disabled>Flash</button>
-        <progress id="progress" max="1" value="0" aria-label="Flash progress"></progress>
-        <span id="progressText" aria-live="polite"></span>
-      </section>
+          <li class="step" aria-labelledby="h-tools">
+            <h2 id="h-tools">Check the tag</h2>
+            <dl id="info" class="facts"></dl>
+            <p class="hint" id="infoEmpty">Connect a probe to read the chip ID and lock state.</p>
+            <div class="row">
+              <button id="unlock" class="danger" disabled>Unlock and erase…</button>
+              <button id="dumpUd" class="quiet" disabled>Back up userdata</button>
+              <button id="reset" class="quiet" disabled>Reset tag</button>
+            </div>
+          </li>
 
-      <section aria-labelledby="h-log">
-        <h2 id="h-log">Log</h2>
-        <pre id="log" role="log" aria-live="polite" tabindex="0"></pre>
-      </section>
+          <li class="step" aria-labelledby="h-fw">
+            <h2 id="h-fw">Flash firmware</h2>
+            <div class="row">
+              <label class="field">Version <select id="version"></select></label>
+              <label class="field grow">Variant <select id="variant"></select></label>
+            </div>
+            <label class="file">Or use a local .s37 or .hex file <input id="file" type="file" accept=".s37,.srec,.hex" /></label>
+            <div class="row">
+              <button id="flash" class="primary" disabled>Flash…</button>
+              <span id="progressText" class="hint" aria-live="polite"></span>
+            </div>
+            <progress id="progress" max="1" value="0" aria-label="Flash progress"></progress>
+          </li>
+        </ol>
+
+        <details class="log-wrap" id="logWrap">
+          <summary>Session log</summary>
+          <pre id="log" role="log" aria-live="polite" tabindex="0"></pre>
+        </details>
+      </div>
     </main>
+
+    <dialog id="confirm" aria-labelledby="confirmTitle">
+      <form method="dialog">
+        <h2 id="confirmTitle"></h2>
+        <p id="confirmBody"></p>
+        <div class="row end">
+          <button value="cancel" class="quiet" autofocus>Cancel</button>
+          <button value="ok" id="confirmOk"></button>
+        </div>
+      </form>
+    </dialog>
+
     <script type="module" src="./src/main.ts"></script>
   </body>
 </html>
